@@ -11,7 +11,7 @@ import { clientsClaim } from "workbox-core";
 import { ExpirationPlugin } from "workbox-expiration";
 import { precacheAndRoute, createHandlerBoundToURL } from "workbox-precaching";
 import { registerRoute } from "workbox-routing";
-import { StaleWhileRevalidate } from "workbox-strategies";
+import { NetworkFirst, StaleWhileRevalidate } from "workbox-strategies";
 
 clientsClaim();
 
@@ -63,6 +63,14 @@ registerRoute(
   })
 );
 
+registerRoute(
+  ({ url }) => url.origin.includes("qorebase.io"),
+  new NetworkFirst({
+    cacheName: "api-data",
+    plugins: [new ExpirationPlugin({ maxAgeSeconds: 360, maxEntries: 30 })],
+  })
+);
+
 self.addEventListener("install", function (event) {
   console.log("Test Install");
 
@@ -73,6 +81,7 @@ self.addEventListener("install", function (event) {
 
   event.waitUntil(asyncInstall);
 });
+
 self.addEventListener("activate", function (event) {
   console.log("Test activate");
 });
